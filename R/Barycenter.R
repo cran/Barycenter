@@ -1,13 +1,14 @@
-#'Computation of a Wasserstein Barycenter
+#'Computation of a regularized Wasserstein Barycenter
 #'
-#'The function \code{Barycenter} takes in a list of matrices and computes the
+#'Based on \link[RcppArmadillo]{RcppArmadillo} the function \code{WaBarycenter} takes in a list of matrices and computes the
 #'corresponding Barycenter.
 #'The list has to consist of matrices having all the same dimensions and each matrix represents the weights of the corresponding pixels of an image. The pixels should be scaled s.t. they sum up to one.
 #'@author Marcel Klatt
 #'@param images A list of matrices satisfying the prerequisites described above.
 #'@param maxIter Maximum gradient iterations.
-#'@param lambda Non-negative smoothing parameter (c.f. \link{Subgradient}).
-#'@return The Barycenter of the images, represented by a \eqn{n x m} matrix. The function returns the Barycenter represented by a \eqn{n x m} matrix and prints also the corresponding image.
+#'@param lambda Non-negative smoothing parameter. If FALSE then the algorithm uses a specific lambda proposed by M. Cuturi.
+#'@param costMatrix A matrix of pairwise distances between the pixels. If FALSE then the algorithm uses the usual euclidean distance matrix where the images are embedded into a [0,1]x[0,1] pixel grid.
+#'@return The Barycenter of the images, represented by a \eqn{n x m} matrix. The function returns the Barycenter represented by a \eqn{n x m} matrix. In case the images are represented by square matrices it also prints the corresponding Barycenter.
 #'
 #'Given the MNIST dataset, a Barycenter of the digit three is shown below. The Barycenter is based on 4351 images each represented by
 #'a 28 x 28 pixel grid, respectively. The values for \code{lambda} and \code{maxIter} were set by default. The dataset is also available in this package (c.f. \link{MNIST_three}).
@@ -15,27 +16,53 @@
 #'\figure{threeMNIST.png}{test}
 #'@references Cuturi, M.: \code{Fast Computation of Wasserstein Barycenters}, Proceedings of the International Conference on Machine Learning, Beijing, China, 2014
 #'@examples #Computation of a Barycenter based on five images representing the digit eight, respectively.
-#'\dontrun{Barycenter(eight)}
+#'WaBarycenter(eight,lambda=10)
+#'#For a more reasonable but longer computation!
+#'\dontrun{WaBarycenter(eight)}
 #'@export
-Barycenter <- function(images, maxIter=10, lambda=60/median(costMatrix)){
+WaBarycenter <- function(images, maxIter = 10, lambda = FALSE, costMatrix = FALSE){
 
   time <- proc.time() #to analyze the computation time
 
-  #get dimension of the image as a grid embedded in [0,1]²
-  dimension <- dim(images[[1]])
-  n <- dimension[1]*dimension[2]
+  #Check if the specific inputs are correct
+    if(is.list(images) == FALSE){
+      stop("The images have to be passed as a list each entry representing a matrix!")
+    }
 
-  #create a grid of the same dimension on [0,1]² and create the cost matrix
-  coord1 <- seq(0,1,length.out = dimension[2])
-  coord2 <- rev(seq(0,1,length.out = dimension[1]))
-  coordinates <- expand.grid(coord1,coord2)
-  costMatrix <- as.matrix(dist(coordinates, diag=TRUE, upper=TRUE))
+    if(length(unique(lapply(images,dim))) == 1){
+      dimension <- dim(images[[1]])
+    }
+    else{
+      stop("Dimensions of the images are not equal!")
+    }
+
+    if(is.matrix(costMatrix) == FALSE){
+      #create a grid of the same dimension as the images on [0,1]² and create the cost matrix
+      n <- dimension[1]*dimension[2]
+      coord1 <- seq(0,1,length.out = dimension[2])
+      coord2 <- rev(seq(0,1,length.out = dimension[1]))
+      coordinates <- expand.grid(coord1,coord2)
+      costMatrix <- as.matrix(dist(coordinates, diag=TRUE, upper=TRUE))
+    }
+    else{
+      n <- dimension[1]*dimension[2]
+      if(identical(dim(costMatrix),rep(n,2)) == FALSE){
+      print(costMatrix)
+      stop("Dimension of the cost matrix is not compatible with the given images!")
+      }
+    }
+    if(lambda == FALSE){
+      lambda <- 60/median(costMatrix)
+    }
+
+  ########### Starting the main algorithm ##########
 
   #initialize a_tild and a_hat
   a_tild <- rep(1/n,n)
   a_hat <- rep(1/n,n)
   t_0 <- 2
   t <- t_0
+  #images <- lapply(images,t)
 
 
   #iteration using Sinkhorn_Distance (Algorithm 1)
@@ -44,24 +71,29 @@ Barycenter <- function(images, maxIter=10, lambda=60/median(costMatrix)){
     a <- (1-1/beta) * a_hat + (1/beta) * a_tild
     #Form subgradient with Sinkhorn's Algorithm
     ALPHA <- 0
-    for(j in 1:length(images)){
-      #This step is based on RcppArmadillo. (Algorithm 3)
-      ALPHA <- Subgradient(a,t(images[[j]]),costMatrix,lambda) + ALPHA  #Note, that we need to transpose each matrix, to be compatible with the coordinates defined above.
-    }
+     for(j in 1:length(images)){
+       #This step is based on RcppArmadillo. (Algorithm 3)
+       ALPHA <- Subgradient(a,t(images[[j]]),costMatrix,lambda) + ALPHA  #Note, that we need to transpose each matrix, to be compatible with the coordinates defined above.
+     }
+   # ALPHA <- (1/length(images)) * Reduce("+",lapply(lapply(images,t), Subgradient,a=a,M=costMatrix,lambda))
     ALPHA <- (1/length(images)) * ALPHA
     a_tild <- a_tild*exp(-(t_0)*beta*ALPHA)
     a_tild <- a_tild/sum(a_tild)
     a_hat <- (1-1/beta)*a_hat + (1/beta) * a_tild
     t <- t+1
-  }
 
+}
 
-  #Transforming Barycenter s.t. function "image" returns the correct orientation.
-  a <- matrix(a,dimension[1],dimension[2],byrow=TRUE)
-  a.temp <- a[,nrow(a):1]
+   if(length(unique(dimension)) == 1){
+   #Transforming Barycenter s.t. function "image" returns the correct orientation.
+   a.temp <- matrix(a,dimension[1],dimension[2],byrow=TRUE)
+   a.temp <- a.temp[,nrow(a.temp):1]
+   #image(a.temp)
+   }
 
-  #Output
-  print(image(a.temp))
-  print(proc.time()-time) #Computation time
-  return(a)
+   #Computation time
+   print(proc.time()-time)
+   #Return the Barycenter
+   #result <- matrix(a,dimension[1],dimension[2],byrow=TRUE)
+   return(a.temp)
 }

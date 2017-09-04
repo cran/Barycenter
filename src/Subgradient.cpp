@@ -1,6 +1,8 @@
+// [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
-//[[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export()]]
+using namespace Rcpp;
+
+// [[Rcpp::export]]
 arma::vec Subgradient(arma::vec a, arma::vec b, arma::mat M, double lambda, int maxIter = 1000, double tolerance = 0.0001) {
 
   // Transforming Input, i.e. calculating the kernel

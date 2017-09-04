@@ -6,9 +6,25 @@
 
 using namespace Rcpp;
 
+// SinkhornDistance
+Rcpp::List SinkhornDistance(arma::mat a, arma::mat b, arma::mat costMatrix, double lambda, int maxIter, double tolerance);
+RcppExport SEXP _Barycenter_SinkhornDistance(SEXP aSEXP, SEXP bSEXP, SEXP costMatrixSEXP, SEXP lambdaSEXP, SEXP maxIterSEXP, SEXP toleranceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type a(aSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type b(bSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type costMatrix(costMatrixSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
+    rcpp_result_gen = Rcpp::wrap(SinkhornDistance(a, b, costMatrix, lambda, maxIter, tolerance));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Subgradient
 arma::vec Subgradient(arma::vec a, arma::vec b, arma::mat M, double lambda, int maxIter, double tolerance);
-RcppExport SEXP Barycenter_Subgradient(SEXP aSEXP, SEXP bSEXP, SEXP MSEXP, SEXP lambdaSEXP, SEXP maxIterSEXP, SEXP toleranceSEXP) {
+RcppExport SEXP _Barycenter_Subgradient(SEXP aSEXP, SEXP bSEXP, SEXP MSEXP, SEXP lambdaSEXP, SEXP maxIterSEXP, SEXP toleranceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,4 +37,15 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(Subgradient(a, b, M, lambda, maxIter, tolerance));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_Barycenter_SinkhornDistance", (DL_FUNC) &_Barycenter_SinkhornDistance, 6},
+    {"_Barycenter_Subgradient", (DL_FUNC) &_Barycenter_Subgradient, 6},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_Barycenter(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
