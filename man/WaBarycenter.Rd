@@ -2,31 +2,31 @@
 % Please edit documentation in R/Barycenter.R
 \name{WaBarycenter}
 \alias{WaBarycenter}
-\title{Computation of a regularized Wasserstein Barycenter}
+\title{Regularized Wasserstein Barycenters}
 \usage{
-WaBarycenter(images, maxIter = 10, lambda = FALSE, costMatrix = FALSE)
+WaBarycenter(images, maxIter = 10, lambda = FALSE, costm = FALSE)
 }
 \arguments{
 \item{images}{A list of matrices satisfying the prerequisites described above.}
 
-\item{maxIter}{Maximum gradient iterations.}
+\item{maxIter}{Maximum number of iterations.}
 
-\item{lambda}{Non-negative smoothing parameter. If FALSE then the algorithm uses a specific lambda proposed by M. Cuturi.}
+\item{lambda}{Non-negative regularization parameter (for large lambda the regularized Barycenter is close to its true counterpart). If FALSE the algorithm uses a lambda depending on \code{costm}.}
 
-\item{costMatrix}{A matrix of pairwise distances between the pixels. If FALSE then the algorithm uses the usual euclidean distance matrix where the images are embedded into a [0,1]x[0,1] pixel grid.}
+\item{costm}{A matrix of pairwise distances between the locations. If FALSE the algorithm uses the usual euclidean distance matrix on a [0,1]x[0,1] equidistant pixel grid.}
 }
 \value{
-The Barycenter of the images, represented by a \eqn{n x m} matrix. The function returns the Barycenter represented by a \eqn{n x m} matrix. In case the images are represented by square matrices it also prints the corresponding Barycenter.
+The Barycenter of the matrices, represented by a \eqn{n x m} matrix.
 
 Given the MNIST dataset, a Barycenter of the digit three is shown below. The Barycenter is based on 4351 images each represented by
-a 28 x 28 pixel grid, respectively. The values for \code{lambda} and \code{maxIter} were set by default. The dataset is also available in this package (c.f. \link{MNIST_three}).
+a 28 x 28 pixel grid, respectively. The values for \code{lambda} and \code{maxIter} were set by default. The dataset is also available in this package (c.f. \link{three}).
 
 \figure{threeMNIST.png}{test}
 }
 \description{
-Based on \link[RcppArmadillo]{RcppArmadillo} the function \code{WaBarycenter} takes in a list of matrices and computes the
+\code{WaBarycenter} takes in a list of matrices representing joint measures on the row and column space and outputs the
 corresponding Barycenter.
-The list has to consist of matrices having all the same dimensions and each matrix represents the weights of the corresponding pixels of an image. The pixels should be scaled s.t. they sum up to one.
+The list has to consist of matrices having all the same dimensions (for instance, each matrix represents the weights of the corresponding pixels summing up to one).
 }
 \examples{
 #Computation of a Barycenter based on five images representing the digit eight, respectively.

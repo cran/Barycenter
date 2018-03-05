@@ -6,19 +6,35 @@
 
 using namespace Rcpp;
 
-// SinkhornDistance
-Rcpp::List SinkhornDistance(arma::mat a, arma::mat b, arma::mat costMatrix, double lambda, int maxIter, double tolerance);
-RcppExport SEXP _Barycenter_SinkhornDistance(SEXP aSEXP, SEXP bSEXP, SEXP costMatrixSEXP, SEXP lambdaSEXP, SEXP maxIterSEXP, SEXP toleranceSEXP) {
+// Greenkhorn
+Rcpp::List Greenkhorn(arma::colvec r, arma::rowvec c, arma::mat costm, double lambda, int maxIter, double tolerance);
+RcppExport SEXP _Barycenter_Greenkhorn(SEXP rSEXP, SEXP cSEXP, SEXP costmSEXP, SEXP lambdaSEXP, SEXP maxIterSEXP, SEXP toleranceSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::colvec >::type r(rSEXP);
+    Rcpp::traits::input_parameter< arma::rowvec >::type c(cSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type costm(costmSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
+    rcpp_result_gen = Rcpp::wrap(Greenkhorn(r, c, costm, lambda, maxIter, tolerance));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Sinkhorn
+Rcpp::List Sinkhorn(arma::mat a, arma::mat b, arma::mat costm, double lambda, int maxIter, double tolerance);
+RcppExport SEXP _Barycenter_Sinkhorn(SEXP aSEXP, SEXP bSEXP, SEXP costmSEXP, SEXP lambdaSEXP, SEXP maxIterSEXP, SEXP toleranceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type a(aSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type b(bSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type costMatrix(costMatrixSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type costm(costmSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
-    rcpp_result_gen = Rcpp::wrap(SinkhornDistance(a, b, costMatrix, lambda, maxIter, tolerance));
+    rcpp_result_gen = Rcpp::wrap(Sinkhorn(a, b, costm, lambda, maxIter, tolerance));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -40,7 +56,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_Barycenter_SinkhornDistance", (DL_FUNC) &_Barycenter_SinkhornDistance, 6},
+    {"_Barycenter_Greenkhorn", (DL_FUNC) &_Barycenter_Greenkhorn, 6},
+    {"_Barycenter_Sinkhorn", (DL_FUNC) &_Barycenter_Sinkhorn, 6},
     {"_Barycenter_Subgradient", (DL_FUNC) &_Barycenter_Subgradient, 6},
     {NULL, NULL, 0}
 };

@@ -1,6 +1,6 @@
 \name{eight}
 \alias{eight}
-\title{A small dataset to run the function Barycenter}
+\title{MNIST dataset of the digit eight (small)}
 \format{List}
 \usage{
 eight

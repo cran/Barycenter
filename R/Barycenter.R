@@ -1,17 +1,17 @@
-#'Computation of a regularized Wasserstein Barycenter
+#'Regularized Wasserstein Barycenters
 #'
-#'Based on \link[RcppArmadillo]{RcppArmadillo} the function \code{WaBarycenter} takes in a list of matrices and computes the
+#' \code{WaBarycenter} takes in a list of matrices representing joint measures on the row and column space and outputs the
 #'corresponding Barycenter.
-#'The list has to consist of matrices having all the same dimensions and each matrix represents the weights of the corresponding pixels of an image. The pixels should be scaled s.t. they sum up to one.
+#'The list has to consist of matrices having all the same dimensions (for instance, each matrix represents the weights of the corresponding pixels summing up to one).
 #'@author Marcel Klatt
 #'@param images A list of matrices satisfying the prerequisites described above.
-#'@param maxIter Maximum gradient iterations.
-#'@param lambda Non-negative smoothing parameter. If FALSE then the algorithm uses a specific lambda proposed by M. Cuturi.
-#'@param costMatrix A matrix of pairwise distances between the pixels. If FALSE then the algorithm uses the usual euclidean distance matrix where the images are embedded into a [0,1]x[0,1] pixel grid.
-#'@return The Barycenter of the images, represented by a \eqn{n x m} matrix. The function returns the Barycenter represented by a \eqn{n x m} matrix. In case the images are represented by square matrices it also prints the corresponding Barycenter.
+#'@param maxIter Maximum number of iterations.
+#'@param lambda Non-negative regularization parameter (for large lambda the regularized Barycenter is close to its true counterpart). If FALSE the algorithm uses a lambda depending on \code{costm}.
+#'@param costm A matrix of pairwise distances between the locations. If FALSE the algorithm uses the usual euclidean distance matrix on a [0,1]x[0,1] equidistant pixel grid.
+#'@return The Barycenter of the matrices, represented by a \eqn{n x m} matrix.
 #'
 #'Given the MNIST dataset, a Barycenter of the digit three is shown below. The Barycenter is based on 4351 images each represented by
-#'a 28 x 28 pixel grid, respectively. The values for \code{lambda} and \code{maxIter} were set by default. The dataset is also available in this package (c.f. \link{MNIST_three}).
+#'a 28 x 28 pixel grid, respectively. The values for \code{lambda} and \code{maxIter} were set by default. The dataset is also available in this package (c.f. \link{three}).
 #'
 #'\figure{threeMNIST.png}{test}
 #'@references Cuturi, M.: \code{Fast Computation of Wasserstein Barycenters}, Proceedings of the International Conference on Machine Learning, Beijing, China, 2014
@@ -20,7 +20,7 @@
 #'#For a more reasonable but longer computation!
 #'\dontrun{WaBarycenter(eight)}
 #'@export
-WaBarycenter <- function(images, maxIter = 10, lambda = FALSE, costMatrix = FALSE){
+WaBarycenter <- function(images, maxIter = 10, lambda = FALSE, costm = FALSE){
 
   time <- proc.time() #to analyze the computation time
 
@@ -36,23 +36,23 @@ WaBarycenter <- function(images, maxIter = 10, lambda = FALSE, costMatrix = FALS
       stop("Dimensions of the images are not equal!")
     }
 
-    if(is.matrix(costMatrix) == FALSE){
+    if(is.matrix(costm) == FALSE){
       #create a grid of the same dimension as the images on [0,1]² and create the cost matrix
       n <- dimension[1]*dimension[2]
       coord1 <- seq(0,1,length.out = dimension[2])
       coord2 <- rev(seq(0,1,length.out = dimension[1]))
       coordinates <- expand.grid(coord1,coord2)
-      costMatrix <- as.matrix(dist(coordinates, diag=TRUE, upper=TRUE))
+      costm <- as.matrix(dist(coordinates, diag=TRUE, upper=TRUE))
     }
     else{
       n <- dimension[1]*dimension[2]
-      if(identical(dim(costMatrix),rep(n,2)) == FALSE){
-      print(costMatrix)
+      if(identical(dim(costm),rep(n,2)) == FALSE){
+      print(costm)
       stop("Dimension of the cost matrix is not compatible with the given images!")
       }
     }
     if(lambda == FALSE){
-      lambda <- 60/median(costMatrix)
+      lambda <- 60/median(costm)
     }
 
   ########### Starting the main algorithm ##########
@@ -73,9 +73,9 @@ WaBarycenter <- function(images, maxIter = 10, lambda = FALSE, costMatrix = FALS
     ALPHA <- 0
      for(j in 1:length(images)){
        #This step is based on RcppArmadillo. (Algorithm 3)
-       ALPHA <- Subgradient(a,t(images[[j]]),costMatrix,lambda) + ALPHA  #Note, that we need to transpose each matrix, to be compatible with the coordinates defined above.
+       ALPHA <- Subgradient(a,t(images[[j]]),costm,lambda) + ALPHA  #Note, that we need to transpose each matrix, to be compatible with the coordinates defined above.
      }
-   # ALPHA <- (1/length(images)) * Reduce("+",lapply(lapply(images,t), Subgradient,a=a,M=costMatrix,lambda))
+   # ALPHA <- (1/length(images)) * Reduce("+",lapply(lapply(images,t), Subgradient,a=a,M=costm,lambda))
     ALPHA <- (1/length(images)) * ALPHA
     a_tild <- a_tild*exp(-(t_0)*beta*ALPHA)
     a_tild <- a_tild/sum(a_tild)

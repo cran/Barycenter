@@ -1,12 +1,12 @@
 #include <RcppArmadillo.h>
 //[[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export()]]
-Rcpp::List SinkhornDistance(arma::mat a, arma::mat b, arma::mat costMatrix, double lambda = 20, int maxIter = 5000, double tolerance = 0.005) {
+Rcpp::List Sinkhorn(arma::mat a, arma::mat b, arma::mat costm, double lambda = 1, int maxIter = 10000, double tolerance = 10^(-8)) {
 
-
+  lambda = 1/lambda;
   // Transforming Input
-  arma::mat K = exp(-lambda*costMatrix);
-  arma::mat U = K % costMatrix;
+  arma::mat K = exp(-lambda*costm);
+  arma::mat U = K % costm;
 
   //Checking the type of computation: 1-vs-N points or many pairs
   bool ONE_VS_N;
@@ -35,19 +35,6 @@ Rcpp::List SinkhornDistance(arma::mat a, arma::mat b, arma::mat costMatrix, doub
   //Initializing certain matrices for the Sinkhorn algorithm
   arma::mat ainvK;
   arma::mat v;
-
-  //Need to update some vectors and matrices if a does not have full support
-  //if(ONE_VS_N == true){
-    //arma::vec a1 = a;
-    //if(all(a1)==false){
-      //K = K.rows(find(a1>0));
-      //a = a.rows(find(a1>0));
-     // U = U.rows(find(a1>0));
-      //ainvK = diagmat(1/a) * K; //Precomputation of this matrix saves a d1 x N Schur product at each iteration
-   // }
-   // ainvK = diagmat(1/a) * K;//Precomputation of this matrix saves a d1 x N Schur product at each iteration
- // }
-
 
   //Need to update some vectors and matrices if a does not have full support
   bool ZeroValues = false;
@@ -130,7 +117,9 @@ Rcpp::List SinkhornDistance(arma::mat a, arma::mat b, arma::mat costMatrix, doub
     }
     return Rcpp::List::create(
       Rcpp::Named("Transportplan") = Transportplan,
-      Rcpp::Named("Distance") = Distance
+      Rcpp::Named("Distance") = Distance,
+      Rcpp::Named("alpha") = lambda*log(u),
+      Rcpp::Named("beta") = lambda*log(v)
     );
   }
   else{
