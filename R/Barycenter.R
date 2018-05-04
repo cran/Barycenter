@@ -2,7 +2,7 @@
 #'
 #' \code{WaBarycenter} takes in a list of matrices representing joint measures on the row and column space and outputs the
 #'corresponding Barycenter.
-#'The list has to consist of matrices having all the same dimensions (for instance, each matrix represents the weights of the corresponding pixels summing up to one).
+#'The list has to consist of matrices having all the same dimensions, for instance, each matrix represents the normalized weights of the corresponding pixels of images.
 #'@author Marcel Klatt
 #'@param images A list of matrices satisfying the prerequisites described above.
 #'@param maxIter Maximum number of iterations.
@@ -19,7 +19,6 @@
 #'WaBarycenter(eight,lambda=10)
 #'#For a more reasonable but longer computation!
 #'\dontrun{WaBarycenter(eight)}
-#'@export
 WaBarycenter <- function(images, maxIter = 10, lambda = FALSE, costm = FALSE){
 
   time <- proc.time() #to analyze the computation time

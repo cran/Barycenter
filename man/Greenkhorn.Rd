@@ -1,7 +1,7 @@
 \name{Greenkhorn}
 \alias{Greenkhorn}
-\title{Sinkhorn Distances (upper bound to EMD)}
-\description{The \code{Greenkhorn} algorithm to compute a dual-Sinkhorn divergence, i.e. upper bounds on the earth movers distance (EMD) a.k.a. Wasserstein distance, between two probability vectors \code{r} and \code{c} with specified cost-matrix \code{costm}.}
+\title{Greenkhorn Distances (approximation to EMD)}
+\description{The \code{Greenkhorn} algorithm to approximate the earth movers distance (EMD), a.k.a. Wasserstein distance, between two probability vectors \code{r} and \code{c} with specified cost-matrix \code{costm}.}
 \usage{
 Greenkhorn(r, c, costm, lambda = 1, maxIter = 10000, tolerance=10^(-8))
 }

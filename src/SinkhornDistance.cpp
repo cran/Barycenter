@@ -28,7 +28,7 @@ Rcpp::List Sinkhorn(arma::mat a, arma::mat b, arma::mat costm, double lambda = 1
 
   //Checking for the case that a transportplan can be returned, i.e. a and b only represent one marginal, respectively
   bool TRANSPORT = false;
-  if(ONE_VS_N == true & b.n_cols == 1 ){
+  if((ONE_VS_N == true) & (b.n_cols == 1)){
     TRANSPORT = true;
   }
 

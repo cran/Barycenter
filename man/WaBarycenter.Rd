@@ -26,7 +26,7 @@ a 28 x 28 pixel grid, respectively. The values for \code{lambda} and \code{maxIt
 \description{
 \code{WaBarycenter} takes in a list of matrices representing joint measures on the row and column space and outputs the
 corresponding Barycenter.
-The list has to consist of matrices having all the same dimensions (for instance, each matrix represents the weights of the corresponding pixels summing up to one).
+The list has to consist of matrices having all the same dimensions, for instance, each matrix represents the normalized weights of the corresponding pixels of images.
 }
 \examples{
 #Computation of a Barycenter based on five images representing the digit eight, respectively.
@@ -34,10 +34,9 @@ WaBarycenter(eight,lambda=10)
 #For a more reasonable but longer computation!
 \dontrun{WaBarycenter(eight)}
 }
-\author{
-Marcel Klatt
-}
 \references{
 Cuturi, M.: \code{Fast Computation of Wasserstein Barycenters}, Proceedings of the International Conference on Machine Learning, Beijing, China, 2014
 }
-
+\author{
+Marcel Klatt
+}

@@ -1,7 +1,7 @@
 \name{Sinkhorn}
 \alias{Sinkhorn}
 \title{Sinkhorn Distances (upper bound to EMD)}
-\description{The \code{Sinkhorn} algorithm to compute \eqn{N} dual-Sinkhorn divergences, i.e. upper bounds on the earth movers distance (EMD) a.k.a. Wasserstein distance.}
+\description{The \code{Sinkhorn} algorithm to compute \eqn{N} dual-Sinkhorn divergences, i.e. upper bounds on the earth movers distance (EMD), a.k.a. Wasserstein distance.}
 \usage{
 Sinkhorn(a, b, costm, lambda = 1, maxIter = 10000, tolerance=10^(-8))
 }
